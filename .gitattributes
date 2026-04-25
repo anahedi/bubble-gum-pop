@@ -1,1 +1,2 @@
+/Users/anahernandez/Proyectos/bubble-gum-pop/data/hey_transacciones.csv filter=lfs diff=lfs merge=lfs -text
 data/hey_transacciones.csv filter=lfs diff=lfs merge=lfs -text
