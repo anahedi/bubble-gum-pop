@@ -1,3 +1,17 @@
+
+from crewai import Agent, LLM
+from src.tools.financial_tools import herramienta_analisis_csv
+
+# Definimos nuestra "llave" para el modelo local
+# No necesitas API Key real, pero CrewAI pide que la variable exista
+local_llm = LLM(
+    model="ollama/llama3.1:8b",
+    base_url="http://localhost:11434",
+    config={
+        "temperature": 0.5, # Balance entre creatividad y precisión financiera
+    }
+)
+
 agente_financiero = Agent(
     role='Senior Financial Growth Strategist',
     goal='Optimizar el valor del usuario en el ecosistema Hey mediante análisis de datos híbridos',
@@ -21,8 +35,10 @@ agente_financiero = Agent(
     Tono y Estilo:
     Actúa con los valores Hey: Agilidad, Innovación y Diseño. Tus reportes deben ser transparentes, estructurados y listos para que el Orquestador los transforme en una solución simple y eficiente.
     """,
+    llm=local_llm, # <--- Usamos el modelo local para este agente
     tools=[herramienta_analisis_csv], # Tu lógica de Python para leer los datasets
     verbose=True,
     allow_delegation=False,
     memory=True # Componente Core de Memoria de Gartner [cite: 103]
 )
+
