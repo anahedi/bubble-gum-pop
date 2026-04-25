@@ -1,14 +1,37 @@
-from crewai import Crew, Process
-from src.agents import orquestador_hey, analista_tda, estratega_fin
-from src.tasks import tarea_analisis_logs, tarea_analisis_transacciones, tarea_proactiva_final
+from crewai import Agent, LLM
 
-# Configuramos la Crew con el Proceso Jerárquico (Recomendado por Gartner para sistemas complejos)
-orquestador_hey = Crew(
-    agents=[analista_tda, estratega_fin],
-    tasks=[tarea_analisis_logs, tarea_analisis_transacciones, tarea_proactiva_final],
-    manager_agent=orquestador_hey, # El orquestador central que maneja el estado [cite: 195]
-    process=Process.hierarchical,
-    verbose=True,
-    memory=True # Memoria de corto y largo plazo para dar continuidad [cite: 109]
+# Configuración del "Cerebro" para tu M4
+# Usamos Llama 3.1 8B para un razonamiento superior
+local_llm = LLM(
+    model="ollama/llama3.1:8b",
+    base_url="http://localhost:11434"
 )
 
+# --- DEFINICIÓN DE AGENTES ---
+
+# 1. El Orquestador (El que fallaba en el import)
+orquestador_hey = Agent(
+    role='Gerente de Experiencia Personalizada Hey',
+    goal='Unificar hallazgos de comportamiento y finanzas para una atención proactiva.',
+    backstory='Experto en hospitalidad digital y diseño de servicios bancarios.',
+    llm=local_llm,
+    verbose=True
+)
+
+# 2. El Analista TDA
+analista_tda = Agent(
+    role='Analista de Comportamiento Topológico',
+    goal='Identificar patrones no lineales en logs de interacción HAVI.',
+    backstory='Matemático especializado en el análisis de formas y persistencia de datos.',
+    llm=local_llm,
+    verbose=True
+)
+
+# 3. El Estratega Financiero
+estratega_fin = Agent(
+    role='Estratega de Crecimiento Financiero',
+    goal='Optimizar el uso de productos y detectar elegibilidad para beneficios como Hey Pro.',
+    backstory='Consultor financiero enfocado en maximizar el valor del usuario.',
+    llm=local_llm,
+    verbose=True
+)
