@@ -10,7 +10,7 @@ tarea_analisis_logs = Task(
     agent=analista_tda
 )
 tarea_analisis_transacciones = Task(
-    description="Analiza las últimas 10 transacciones del usuario {user_id}. Identifica patrones de gasto o fricciones.",
+    description="Analiza las últimas 5 transacciones del usuario {user_id}. Identifica patrones de gasto o fricciones.",
     expected_output="Identificación de patrones de gasto o fricciones en las últimas 10 transacciones.",
     agent=estratega_fin
 )   
@@ -20,8 +20,10 @@ tarea_proactiva_final = Task(
     description="""
     1. RECUPERAR: Lee los informes del Analista TDA y del Estratega Financiero.
     2. ORGANIZAR (Semántica): Aplica la Matriz de Prioridad Hey. Si hay fricción en transacciones, eso va primero. Si no, prioriza Hey Pro.
-    3. SELECCIONAR: Elige la oferta con mayor impacto financiero para el usuario.
-    4. REDACTAR: Crea un mensaje empático. 
+    3. SELECCIONAR: Elige la oferta con mayor impacto financiero para el usuario. 
+    4.INVESTIGAR (RAG): Pide al Estratega Financiero que use su herramienta de scrapeo 
+               para buscar en la web de Hey Banco la información exacta sobre lo que el usuario pregunta.
+    5. REDACTAR: Crea un mensaje empático. 
     
     IMPORTANTE: Debes incluir una sección de 'Procedencia' explicando qué dato (transacción o log) originó esta recomendación.
     """,

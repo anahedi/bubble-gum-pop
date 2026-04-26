@@ -1,6 +1,9 @@
 from crewai import Agent, LLM
 # IMPORTANTE: Esta es la línea que faltaba para corregir el NameError
 from src.tools.financial_tools import herramienta_analisis_csv
+from crewai_tools import ScrapeWebsiteTool
+
+herramienta_web_hey = ScrapeWebsiteTool(website_url='https://www.heybanco.com/hey-pro')
 
 # Configuración ligera para la MacBook Air M4 (Ollama)
 local_llm = LLM(
@@ -36,6 +39,7 @@ estratega_fin = Agent(
     goal='Identificar si el usuario califica para Hey Pro o Inversión.',
     backstory='Especialista en productos bancarios de Hey Banco.',
     llm=local_llm,
+    tools=[herramienta_web_hey],
     max_iter=2,
     verbose=True
 )
