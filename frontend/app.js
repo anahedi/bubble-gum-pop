@@ -101,66 +101,81 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (data.analysis) {
                 const cleanText = data.analysis.replace(/```json/g, '').replace(/```/g, '').trim();
+                let parsed = {};
                 
                 try {
-                    const parsed = JSON.parse(cleanText);
-                    
-                    // Initial bot prompt to save in history
-                    chatHistory.push({ role: "assistant", content: cleanText });
-                    
-                    htmlContent = `
-                        <div class="mockup-card">
-                            <div class="mockup-header">
-                                <div class="mockup-header-left">
-                                    <div class="mockup-logo">HEY</div>
-                                    <div class="mockup-title">
-                                        <strong>Hey Banco</strong>
-                                        <small>Hace un momento</small>
-                                    </div>
+                    parsed = JSON.parse(cleanText);
+                } catch(e) {
+                    console.warn("JSON parse failed, attempting regex extraction...");
+                    // Regex fallbacks for hallucinogenic JSONs
+                    const extract = (key) => {
+                        const regex = new RegExp(`"${key}"\\s*:\\s*"([^"]+)"`, "i");
+                        const match = cleanText.match(regex);
+                        return match ? match[1] : null;
+                    };
+                    parsed = {
+                        Decision: extract("Decision") || extract("decision"),
+                        Mensaje: extract("Mensaje") || extract("mensaje"),
+                        Razon1_Titulo: extract("Razon1_Titulo") || "Motivo Principal",
+                        Razon1_Desc: extract("Razon1_Desc") || "Historial financiero.",
+                        Razon2_Titulo: extract("Razon2_Titulo") || "Perfil",
+                        Razon2_Desc: extract("Razon2_Desc") || "Adecuado para el cliente."
+                    };
+                }
+                
+                // Initial bot prompt to save in history
+                chatHistory.push({ role: "assistant", content: parsed.Mensaje || cleanText });
+                
+                htmlContent = `
+                    <div class="mockup-card">
+                        <div class="mockup-header">
+                            <div class="mockup-header-left">
+                                <div class="mockup-logo">HEY</div>
+                                <div class="mockup-title">
+                                    <strong>Hey Banco</strong>
+                                    <small>Hace un momento</small>
                                 </div>
-                                <div class="mockup-pill-nuevo">NUEVO</div>
                             </div>
-                            <div class="mockup-success">
-                                <i class="fa-regular fa-circle-check"></i> ANÁLISIS COMPLETADO EXITOSAMENTE
+                            <div class="mockup-pill-nuevo">NUEVO</div>
+                        </div>
+                        <div class="mockup-success">
+                            <i class="fa-regular fa-circle-check"></i> ANÁLISIS COMPLETADO EXITOSAMENTE
+                        </div>
+                        <div class="mockup-body">
+                            <div class="mockup-recommendation-label">
+                                RECOMENDACIÓN <span class="mockup-pill-yellow">${parsed.Decision || parsed.decision || 'Recomendación Hey'}</span>
                             </div>
-                            <div class="mockup-body">
-                                <div class="mockup-recommendation-label">
-                                    RECOMENDACIÓN <span class="mockup-pill-yellow">${parsed.Decision || parsed.decision || 'Recomendación Hey'}</span>
+                            <div class="mockup-message-box">
+                                ${parsed.Mensaje || parsed.mensaje || cleanText}
+                            </div>
+                            
+                            <div class="mockup-why-title">¿POR QUÉ ESTA TARJETA?</div>
+                            
+                            <div class="mockup-reason-yellow">
+                                <div class="mockup-reason-icon-circle">!</div>
+                                <div>
+                                    <strong>${parsed.Razon1_Titulo || 'Motivo Principal'}:</strong> ${parsed.Razon1_Desc || ''}
                                 </div>
-                                <div class="mockup-message-box">
-                                    ${parsed.Mensaje || parsed.mensaje || cleanText}
+                            </div>
+                            
+                            <div class="mockup-reason-blue">
+                                <div class="mockup-reason-icon-square"><i class="fa-solid fa-layer-group"></i></div>
+                                <div>
+                                    <strong>${parsed.Razon2_Titulo || 'Perfil'}:</strong> ${parsed.Razon2_Desc || ''}
                                 </div>
-                                
-                                <div class="mockup-why-title">¿POR QUÉ ESTA TARJETA?</div>
-                                
-                                <div class="mockup-reason-yellow">
-                                    <div class="mockup-reason-icon-circle">!</div>
-                                    <div>
-                                        <strong>${parsed.Razon1_Titulo || 'Motivo Principal'}:</strong> ${parsed.Razon1_Desc || ''}
-                                    </div>
-                                </div>
-                                
-                                <div class="mockup-reason-blue">
-                                    <div class="mockup-reason-icon-square"><i class="fa-solid fa-layer-group"></i></div>
-                                    <div>
-                                        <strong>${parsed.Razon2_Titulo || 'Perfil'}:</strong> ${parsed.Razon2_Desc || ''}
-                                    </div>
-                                </div>
-                                
-                                <div class="mockup-actions">
-                                    <button class="mockup-btn-yellow">Ver detalles ↗</button>
-                                    <button class="mockup-btn-black">Solicitar ↗</button>
-                                </div>
+                            </div>
+                            
+                            <div class="mockup-actions">
+                                <button class="mockup-btn-yellow">Ver detalles ↗</button>
+                                <button class="mockup-btn-black">Solicitar ↗</button>
                             </div>
                         </div>
-                    `;
-                    
-                    // Show chat input!
-                    chatInputContainer.classList.remove('hidden');
-                    
-                } catch(e) {
-                    htmlContent = `<div class="chat-message-ai"><i class="fa-solid fa-sparkles"></i>\n\n${cleanText}</div>`;
-                }
+                    </div>
+                `;
+                
+                // Show chat input!
+                chatInputContainer.classList.remove('hidden');
+                
             } else {
                 htmlContent = `<div class="chat-message-ai" style="color: red">No se obtuvo respuesta del agente.</div>`;
             }
