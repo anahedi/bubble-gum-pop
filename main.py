@@ -1,4 +1,9 @@
 from src.crew import equipo_hey_proactivo
+import sys
+
+# Forzar codificación UTF-8 para evitar que los Emojis crasheen el servidor en Windows
+if sys.stdout.encoding.lower() != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 def run_hey_agent(user_id: str):
     """
