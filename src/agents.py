@@ -1,28 +1,45 @@
-agente_financiero = Agent(
-    role='Senior Financial Growth Strategist',
-    goal='Optimizar el valor del usuario en el ecosistema Hey mediante análisis de datos híbridos',
-    backstory="""Rol: Senior Financial Growth Strategist en Hey Banco.
-    Contexto de Datos: Tienes acceso a tres fuentes críticas:
-    1. hey_clientes.csv: Perfil demográfico y señales de comportamiento.
-    2. hey_productos.csv: Portafolio actual y saldos.
-    3. hey_transacciones.csv: Historial de movimientos detallado.
+from crewai import Agent, LLM
+# IMPORTANTE: Esta es la línea que faltaba para corregir el NameError
+from src.tools.financial_tools import herramienta_analisis_csv
+from crewai_tools import ScrapeWebsiteTool
 
-    Misión Principal:
-    Tu objetivo es realizar una auditoría financiera proactiva del usuario para identificar "necesidades implícitas" y convertirlas en "impacto real". Debes analizar el comportamiento financiero sin supervisión humana para revelar patrones de gasto y ahorro.
+herramienta_web_hey = ScrapeWebsiteTool(website_url='https://www.heybanco.com/hey-pro')
 
-    Directrices de Análisis:
+# Configuración ligera para la MacBook Air M4 (Ollama)
+local_llm = LLM(
+    model="ollama/llama3.2:3b",
+    base_url="http://localhost:11434"
+)
 
-    Conversión a Hey Pro: Verifica si el usuario realiza al menos 6 compras mensuales mayores a $100 MXN. Si es_hey_pro es False, calcula el cashback potencial que está perdiendo.
-    * Optimización de Activos: Si detectas un saldo_actual elevado en cuenta_debito y inversion_hey es nulo, propone una estrategia de inversión basada en su ingreso_mensual_mxn.
+# Agente Orquestador (El Manager)
+orquestador_hey = Agent(
+    role='Orquestador de Experiencia Hey',
+    goal='Coordinar la visión financiera y el perfil del usuario para una oferta proactiva.',
+    backstory='Líder en hospitalidad bancaria. Asegura que los mensajes sean empáticos y precisos.',
+    llm=local_llm,
+    max_iter=2, # Límite para evitar calor
+    verbose=True
+)
 
-    Detección de Fricción: Analiza los motivos_no_procesada en las transacciones (ej. limite_excedido). Sugiere ajustes preventivos.
-    * Seguridad y Riesgo: Identifica si patron_uso_atipico es True para recomendar bloqueos preventivos o educación en ciberseguridad.
-
-    Tono y Estilo:
-    Actúa con los valores Hey: Agilidad, Innovación y Diseño. Tus reportes deben ser transparentes, estructurados y listos para que el Orquestador los transforme en una solución simple y eficiente.
-    """,
-    tools=[herramienta_analisis_csv], # Tu lógica de Python para leer los datasets
-    verbose=True,
+# Agente Analista (El que lee el CSV real)
+analista_tda = Agent(
+    role='Analista de Perfilamiento TDA',
+    goal='Extraer UNICAMENTE la información del archivo CSV para el usuario.',
+    backstory='Eres un experto en lectura de datos. Tu fuente de verdad es el CSV multi_mapper_profile_final.',
+    tools=[herramienta_analisis_csv], # <--- Ahora ya está definida por el import de arriba
     allow_delegation=False,
-    memory=True # Componente Core de Memoria de Gartner [cite: 103]
+    max_iter=2,
+    llm=local_llm,
+    verbose=True
+)
+
+# Agente Estratega (El de los números)
+estratega_fin = Agent(
+    role='Estratega de Crecimiento Financiero',
+    goal='Identificar si el usuario califica para Hey Pro o Inversión.',
+    backstory='Especialista en productos bancarios de Hey Banco.',
+    llm=local_llm,
+    tools=[herramienta_web_hey],
+    max_iter=2,
+    verbose=True
 )

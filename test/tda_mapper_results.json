@@ -1,0 +1,15 @@
+{
+  "user_id": "USR-00001",
+  "node_id": 42,
+  "cluster_name": "The Friction Loop (Bucle de Fricción)",
+  "topology_context": {
+    "persistence": 0.85, 
+    "connectivity": "Conectado a nodos de 'Abandono (Churn)'",
+    "neighborhood_behavior": "Usuarios que intentan realizar una transferencia SPEI más de 3 veces sin éxito."
+  },
+  "metrics": {
+    "session_depth": "Alta (mucho tiempo en una sola pantalla)",
+    "transaction_velocity": "Decreciente"
+  }
+}
+
