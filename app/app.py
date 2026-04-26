@@ -15,7 +15,7 @@ if "logged_in" not in st.session_state:
 
 # Login
 if not st.session_state.logged_in:
-    st.title("Login")
+    st.title("Havi 2.0")
 
     user_input = st.text_input("Ingresa tu user_id")
 
