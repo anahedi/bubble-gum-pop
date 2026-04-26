@@ -15,7 +15,7 @@ if "logged_in" not in st.session_state:
 
 # Login
 if not st.session_state.logged_in:
-    st.markdown("# **hey,** banco")
+    st.title("hey, banco")
 
     user_input = st.text_input("Ingresa tu usuario")
 
