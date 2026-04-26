@@ -1,21 +1,19 @@
 from crewai import Task
 from src.tools.financial_tools import herramienta_analisis_csv
 from src.agents import orquestador_hey
-
-# Tarea 1: Análisis de logs (Aquí entrará el TDA de tu compañera)
+from src.agents import analista_tda
+from src.agents import estratega_fin    
+# En src/tasks.py
 tarea_analisis_logs = Task(
-    description="Analizar los logs de comportamiento del usuario {user_id} para detectar frustración.",
-    expected_output="Un reporte de clusters de comportamiento y sentimiento BERT.",
-    agent=None # El orquestador lo asignará
+    description="Consulta el perfil TDA del usuario {user_id}. Resume en 3 puntos clave.",
+    expected_output="Resumen ejecutivo de 3 líneas sobre el perfil TDA.",
+    agent=analista_tda
 )
-
-# Tarea 2: Análisis financiero
 tarea_analisis_transacciones = Task(
-    description="Revisar los CSVs de Hey Banco para el usuario {user_id}.",
-    expected_output="Resumen de elegibilidad para Hey Pro y oportunidades de inversión.",
-    agent=None,
-    tools=[herramienta_analisis_csv]
-)
+    description="Analiza las últimas 10 transacciones del usuario {user_id}. Identifica patrones de gasto o fricciones.",
+    expected_output="Identificación de patrones de gasto o fricciones en las últimas 10 transacciones.",
+    agent=estratega_fin
+)   
 
 # Tarea 3: Recomendación final
 tarea_proactiva_final = Task(
