@@ -9,7 +9,7 @@ def run_hey_agent():
     # 1. Definimos el Input (El usuario que queremos analizar del dataset)
     # Puedes cambiarlo a USR-00001 o USR-00002 para probar los diferentes Mocks
     inputs = {
-        'user_id': 'USR-00055' 
+        'user_id': 'USR-00100' 
     }
 
     print(f"\n{'='*50}")
@@ -32,4 +32,3 @@ def run_hey_agent():
 
 if __name__ == "__main__":
     run_hey_agent()
-    

@@ -3,33 +3,44 @@ from crewai.tools import tool
 
 @tool("herramienta_analisis_csv")
 def herramienta_analisis_csv(user_id: str):
-    """Analiza el perfil TDA y financiero real del usuario."""
+    """
+    Analiza el historial transaccional real usando 'tipo_operacion' y 'monto'.
+    Detecta patrones de gasto en comercios y categorías MCC.
+    """
     try:
-        # 1. Cargamos el archivo que subiste (Asegúrate que esté en data/)
-        df = pd.read_csv('data/multi_mapper_profile_final.csv')
+        df_tx = pd.read_csv('data/hey_transacciones.csv')
         
-        # 2. NORMALIZACIÓN TOTAL: Quitamos espacios y pasamos a minúsculas
-        df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+        # 1. Normalizamos por si acaso (quita espacios)
+        df_tx.columns = df_tx.columns.str.strip()
         
-        # 3. Buscamos al usuario (Asegúrate de buscar 'USR-00001')
         user_id = str(user_id).strip()
-        cliente_data = df[df['user_id'] == user_id]
+        user_tx = df_tx[df_tx['user_id'] == user_id]
         
-        if cliente_data.empty:
-            return f"Usuario {user_id} no encontrado en la base de datos TDA."
-            
-        res = cliente_data.iloc[0]
+        if user_tx.empty:
+            return f"No hay transacciones para {user_id}."
+
+        # 2. Ajustamos la lógica de balance con tus columnas reales
+        # Nota: He puesto 'compra' y 'deposito' como ejemplo, 
+        # pero el código ahora es más flexible.
+        total_egresos = user_tx[user_tx['tipo_operacion'].str.contains('compra|cargo|egreso', case=False, na=False)]['monto'].sum()
+        total_ingresos = user_tx[user_tx['tipo_operacion'].str.contains('deposito|abono|ingreso', case=False, na=False)]['monto'].sum()
+        balance_neto = total_ingresos - total_egresos
         
-        # 4. Construimos el reporte real
-        reporte = (
-            f"DATOS REALES TDA PARA {user_id}:\n"
-            f"- Perfil: {res['perfil_final_tda']}\n"
-            f"- Tags detectados: {res['tags_personalidad']}\n"
-            f"- Contexto: El usuario pertenece a los nodos {res['nodos_financieros']}"
+        # 3. Extraemos contexto de valor (Comercios y Categorías)
+        # Esto le sirve al Orquestador para saber en QUÉ gasta
+        top_comercios = user_tx['comercio_nombre'].value_counts().head(3).index.tolist()
+        
+        # 4. Últimos movimientos
+        ultimas_tx = user_tx.tail(5)[['fecha_hora', 'comercio_nombre', 'monto', 'tipo_operacion']].to_string(index=False)
+        
+        return (
+            f"--- AUDITORÍA FINANCIERA REAL ({user_id}) ---\n"
+            f"Flujo Mensual Neto: ${balance_neto:,.2f}\n"
+            f"Ingresos: ${total_ingresos:,.2f} | Egresos: ${total_egresos:,.2f}\n\n"
+            f"COMERCIOS FRECUENTES: {', '.join(top_comercios)}\n\n"
+            f"ÚLTIMOS 5 MOVIMIENTOS:\n{ultimas_tx}\n"
+            f"--------------------------------------------"
         )
-        return reporte
         
     except Exception as e:
-        return f"Error crítico en Capa de Contexto: {str(e)}"
-    
-    
+        return f"Error en lectura de transacciones: {str(e)}"
