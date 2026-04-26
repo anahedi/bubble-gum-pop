@@ -1,63 +1,35 @@
 import pandas as pd
-import numpy as np
+from crewai.tools import tool
 
-def analizador_transaccional_hey(user_id_target):
-    """
-    Realiza una auditoría financiera profunda cruzando los tres datasets principales.
-    """
-    # 1. Carga de Datasets 
+@tool("herramienta_analisis_csv")
+def herramienta_analisis_csv(user_id: str):
+    """Analiza el perfil TDA y financiero real del usuario."""
     try:
-        df_clientes = pd.read_csv('data/hey_clientes.csv')
-        df_productos = pd.read_csv('data/hey_productos.csv')
-        df_transacciones = pd.read_csv('data/hey_transacciones.csv')
-    except FileNotFoundError:
-        return "Error: No se encontraron los archivos CSV del dataset."
-
-    # 2. Filtrado por Usuario 
-    cliente = df_clientes[df_clientes['user_id'] == user_id_target].iloc[0]
-    productos_user = df_productos[df_productos['user_id'] == user_id_target]
-    transacciones_user = df_transacciones[df_transacciones['user_id'] == user_id_target]
-
-    insights = []
-
-    #Lógica 1: Verificación de Estatus Hey Pro  
-    #criterio: 6 compras completadas > $100 MXN al mes
-    compras_validas = transacciones_user[
-        (transacciones_user['tipo_operacion'] == 'compra') & 
-        (transacciones_user['estatus'] == 'completada') & 
-        (transacciones_user['monto'] > 100)
-    ]
+        # 1. Cargamos el archivo que subiste (Asegúrate que esté en data/)
+        df = pd.read_csv('data/multi_mapper_profile_final.csv')
+        
+        # 2. NORMALIZACIÓN TOTAL: Quitamos espacios y pasamos a minúsculas
+        df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+        
+        # 3. Buscamos al usuario (Asegúrate de buscar 'USR-00001')
+        user_id = str(user_id).strip()
+        cliente_data = df[df['user_id'] == user_id]
+        
+        if cliente_data.empty:
+            return f"Usuario {user_id} no encontrado en la base de datos TDA."
+            
+        res = cliente_data.iloc[0]
+        
+        # 4. Construimos el reporte real
+        reporte = (
+            f"DATOS REALES TDA PARA {user_id}:\n"
+            f"- Perfil: {res['perfil_final_tda']}\n"
+            f"- Tags detectados: {res['tags_personalidad']}\n"
+            f"- Contexto: El usuario pertenece a los nodos {res['nodos_financieros']}"
+        )
+        return reporte
+        
+    except Exception as e:
+        return f"Error crítico en Capa de Contexto: {str(e)}"
     
-    conteo_compras = len(compras_validas)
-    es_pro_actual = cliente['es_hey_pro']
-
-    if conteo_compras >= 6 and not es_pro_actual:
-        cashback_perdido = compras_validas['monto'].sum() * 0.01 
-        insights.append(f"CRÍTICO: Usuario elegible para Hey Pro ({conteo_compras} compras). Pierde ${cashback_perdido:.2f} de cashback mensual.")
-    elif es_pro_actual:
-        insights.append(f"ESTATUS: Usuario ya es Hey Pro. Beneficios activos.")
-
-    #Lógica 2: Optimización de Activos (Inversión) 
-    debito = productos_user[productos_user['tipo_producto'] == 'cuenta_debito']
-    tiene_inversion = not productos_user[productos_user['tipo_producto'] == 'inversion_hey'].empty
     
-    if not debito.empty:
-        saldo_debito = debito['saldo_actual'].sum()
-        if saldo_debito > (cliente['ingreso_mensual_mxn'] * 0.5) and not tiene_inversion:
-            insights.append(f"OPORTUNIDAD: Saldo ocioso de ${saldo_debito:.2f}. Recomendado mover a Inversión Hey (GAT).")
-
-    # Lógica 3: Análisis de Fricción (Transacciones Fallidas) 
-    fallidas = transacciones_user[transacciones_user['estatus'] == 'no_procesada']
-    if not fallidas.empty:
-        motivo_frecuente = fallidas['motivos_no_procesada'].mode().iloc[0]
-        insights.append(f"FRICCIÓN: {len(fallidas)} intentos fallidos. Motivo principal: {motivo_frecuente}.")
-
-    #Lógica 4: Patrones de Gasto (Top Categorías) 
-    top_mcc = transacciones_user.groupby('categoria_mcc')['monto'].sum().sort_values(ascending=False).head(2)
-    insights.append(f"GASTOS: Sus mayores consumos son en {', '.join(top_mcc.index.tolist())}.")
-
-    # Respuesta estructurada para el Agente Financiero
-    return "\n".join(insights)
-
-# Ejemplo de uso:
-print(analizador_transaccional_hey('USR-00001'))
