@@ -1,31 +1,38 @@
 import streamlit as st
+import pandas as pd
 
-# Inicializar estado
-if "usuario" not in st.session_state:
-    st.session_state.usuario = None
+# Cargar usuarios
+@st.cache_data
+def cargar_usuarios():
+    df = pd.read_csv("data/hey_clientes.csv")
+    return df["user_id"].astype(str).tolist()
 
-def login():
-    st.title("Inicio de sesión")
+usuarios_validos = cargar_usuarios()
 
-    usuario = st.text_input("Ingresa tu usuario")
+# Estado de sesión
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+# Login
+if not st.session_state.logged_in:
+    st.title("Login")
+
+    user_input = st.text_input("Ingresa tu user_id")
 
     if st.button("Entrar"):
-        if usuario.strip() != "":
-            st.session_state.usuario = usuario
+        if user_input in usuarios_validos:
+            st.session_state.logged_in = True
+            st.session_state.user_id = user_input
+            st.success("Acceso concedido")
             st.rerun()
         else:
-            st.warning("Por favor ingresa un usuario")
+            st.error("Usuario no válido")
 
-def app_principal():
-    st.title("App del banco 🏦")
-    st.write(f"Bienvenido, {st.session_state.usuario}")
+# Pantalla después de login
+else:
+    st.title("Bienvenido")
+    st.write(f"Tu user_id es: {st.session_state.user_id}")
 
     if st.button("Cerrar sesión"):
-        st.session_state.usuario = None
+        st.session_state.logged_in = False
         st.rerun()
-
-# Control de flujo
-if st.session_state.usuario is None:
-    login()
-else:
-    app_principal()
