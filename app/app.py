@@ -15,9 +15,9 @@ if "logged_in" not in st.session_state:
 
 # Login
 if not st.session_state.logged_in:
-    st.title("Havi 2.0")
+    st.title("Inicio de sesión")
 
-    user_input = st.text_input("Ingresa tu user_id")
+    user_input = st.text_input("Ingresa tu usuario")
 
     if st.button("Entrar"):
         if user_input in usuarios_validos:
@@ -30,8 +30,8 @@ if not st.session_state.logged_in:
 
 # Pantalla después de login
 else:
-    st.title("Bienvenido")
-    st.write(f"Tu user_id es: {st.session_state.user_id}")
+    st.title("Havi 2.0")
+    st.write(f"Bienvenido, {st.session_state.user_id}")
 
     if st.button("Cerrar sesión"):
         st.session_state.logged_in = False
