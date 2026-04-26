@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hey Proactivo | Inteligencia Financiera</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <i class="fa-solid fa-bolt text-accent"></i>
+                </div>
+                <h2>Hey <span class="text-accent">Proactivo</span></h2>
+            </div>
+            
+            <div class="user-selector">
+                <label for="userSelect">Seleccionar Cliente</label>
+                <div class="select-wrapper">
+                    <select id="userSelect">
+                        <option value="">Cargando usuarios...</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+
+            <div class="profile-card hidden" id="profileCard">
+                <h3>Perfil de Cliente</h3>
+                <div class="profile-info">
+                    <div class="info-group">
+                        <span class="label">ID</span>
+                        <span class="value" id="p_user_id">--</span>
+                    </div>
+                    <div class="info-group">
+                        <span class="label">Necesidad Principal</span>
+                        <span class="value badge" id="p_need">--</span>
+                    </div>
+                    <div class="info-group">
+                        <span class="label">Perfil Especialista</span>
+                        <span class="value text-highlight" id="p_specialist">--</span>
+                    </div>
+                </div>
+
+                <div class="tags-container mt-4">
+                    <p class="label mb-2">Personalidad TDA:</p>
+                    <div class="tags" id="p_tags">
+                        <!-- tags go here -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header glass-panel">
+                <div class="header-title">
+                    <h1>Dashboard de Gastos</h1>
+                    <p>Análisis en tiempo real de transacciones</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="btnAnalyze" disabled>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Analizar con IA
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- Transactions Table -->
+                <div class="transactions-panel glass-panel">
+                    <div class="panel-header">
+                        <h3>Últimas Transacciones</h3>
+                        <span class="badge" id="txCount">0 movimientos</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Comercio</th>
+                                    <th>Categoría</th>
+                                    <th>Tipo</th>
+                                    <th class="text-right">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="txBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Selecciona un usuario para ver transacciones</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- AI Analysis Panel -->
+                <div class="ai-panel glass-panel">
+                    <div class="panel-header">
+                        <h3>Asesor Hey IA</h3>
+                    </div>
+                    <div class="ai-content" id="aiContent">
+                        <div class="empty-state">
+                            <div class="pulsing-circle">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <p>La IA está lista para analizar los datos financieros de este usuario.</p>
+                            <p class="text-sm text-muted">Presiona "Analizar con IA" para comenzar.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="loading-state hidden" id="aiLoading">
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <p>Analizando fricciones y generando recomendaciones con GPT-4o...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

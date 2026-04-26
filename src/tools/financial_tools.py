@@ -31,14 +31,14 @@ def herramienta_analisis_csv(user_id: str):
         top_comercios = user_tx['comercio_nombre'].value_counts().head(3).index.tolist()
         
         # 4. Últimos movimientos
-        ultimas_tx = user_tx.tail(5)[['fecha_hora', 'comercio_nombre', 'monto', 'tipo_operacion']].to_string(index=False)
+        ultimas_tx = user_tx.tail(10)[['fecha_hora', 'comercio_nombre', 'monto', 'tipo_operacion']].to_string(index=False)
         
         return (
             f"--- AUDITORÍA FINANCIERA REAL ({user_id}) ---\n"
           #  f"Flujo Mensual Neto: ${balance_neto:,.2f}\n"
             f"Ingresos: ${total_ingresos:,.2f} | Egresos: ${total_egresos:,.2f}\n\n"
             f"COMERCIOS FRECUENTES: {', '.join(top_comercios)}\n\n"
-            f"ÚLTIMOS 5 MOVIMIENTOS:\n{ultimas_tx}\n"
+            f"ÚLTIMOS 10 MOVIMIENTOS:\n{ultimas_tx}\n"
             f"--------------------------------------------"
         )
         

@@ -10,7 +10,7 @@ tarea_analisis_logs = Task(
     agent=analista_tda
 )
 tarea_analisis_transacciones = Task(
-    description="Analiza las últimas 5 transacciones del usuario {user_id}. Identifica patrones de gasto o fricciones.",
+    description="Analiza las últimas 10 transacciones del usuario {user_id}. Identifica patrones de gasto o fricciones.",
     expected_output="Identificación de patrones de gasto o fricciones en las últimas 10 transacciones.",
     agent=estratega_fin
 )   
