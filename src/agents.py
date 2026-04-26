@@ -2,7 +2,7 @@ from crewai import Agent, LLM
 
 # Configuración del motor local para tu M4
 local_llm = LLM(
-    model="ollama/llama3.1:8b",
+    model="ollama/llama3.2:3b",
     base_url="http://localhost:11434"
 )
 
@@ -13,6 +13,7 @@ orquestador_hey = Agent(
     goal='Unificar visión financiera y sentimiento para atención proactiva.',
     backstory='Líder en hospitalidad bancaria encargado de la toma de decisiones final.',
     llm=local_llm,
+    max_iter=3, # Limitamos a 3 intentos para evitar sobrecalentamiento
     verbose=True
 )
 

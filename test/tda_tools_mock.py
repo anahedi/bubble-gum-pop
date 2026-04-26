@@ -24,7 +24,7 @@ def tda_mapper_tool(user_id: str):
 
     # Si el ID no está, devolvemos uno por defecto
     data = mock_responses.get(user_id, mock_responses["USR-00001"])
-    
+
     return f"""
     --- REPORTE TDA (MOCK) ---
     CLUSTER: {data['cluster']}
@@ -32,3 +32,4 @@ def tda_mapper_tool(user_id: str):
     ANÁLISIS TDA: {data['insight_topologico']}
     CONCLUSIÓN: {data['necesidad_implicita']}
     """
+

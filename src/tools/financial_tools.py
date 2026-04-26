@@ -7,6 +7,11 @@ def herramienta_analisis_csv(user_id: str):
     Analiza los datasets de Hey Banco (clientes, productos y transacciones).
     Normaliza nombres de columnas y genera insights financieros.
     """
+    # Limpieza de seguridad: Si el LLM manda basura, intentamos rescatar el ID
+    if isinstance(user_id, dict):
+        user_id = user_id.get('user_id', 'USR-00001')
+    
+    user_id = str(user_id).strip()
     try:
         # 1. Carga de datos con normalización de columnas (espacios -> guiones bajos)
         df_clientes = pd.read_csv('data/hey_clientes.csv')
