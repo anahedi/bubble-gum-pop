@@ -24,7 +24,7 @@ def herramienta_analisis_csv(user_id: str):
         # pero el código ahora es más flexible.
         total_egresos = user_tx[user_tx['tipo_operacion'].str.contains('compra|cargo|egreso', case=False, na=False)]['monto'].sum()
         total_ingresos = user_tx[user_tx['tipo_operacion'].str.contains('deposito|abono|ingreso', case=False, na=False)]['monto'].sum()
-        balance_neto = total_ingresos - total_egresos
+        #balance_neto = total_ingresos - total_egresos
         
         # 3. Extraemos contexto de valor (Comercios y Categorías)
         # Esto le sirve al Orquestador para saber en QUÉ gasta
@@ -35,7 +35,7 @@ def herramienta_analisis_csv(user_id: str):
         
         return (
             f"--- AUDITORÍA FINANCIERA REAL ({user_id}) ---\n"
-            f"Flujo Mensual Neto: ${balance_neto:,.2f}\n"
+          #  f"Flujo Mensual Neto: ${balance_neto:,.2f}\n"
             f"Ingresos: ${total_ingresos:,.2f} | Egresos: ${total_egresos:,.2f}\n\n"
             f"COMERCIOS FRECUENTES: {', '.join(top_comercios)}\n\n"
             f"ÚLTIMOS 5 MOVIMIENTOS:\n{ultimas_tx}\n"

@@ -21,8 +21,9 @@ tarea_proactiva_final = Task(
     1. RECUPERAR: Lee los informes del Analista TDA y del Estratega Financiero.
     2. ORGANIZAR (Semántica): Aplica la Matriz de Prioridad Hey. Si hay fricción en transacciones, eso va primero. Si no, prioriza Hey Pro.
     3. SELECCIONAR: Elige la oferta con mayor impacto financiero para el usuario. 
-    4.INVESTIGAR (RAG): Pide al Estratega Financiero que use su herramienta de scrapeo 
-               para buscar en la web de Hey Banco la información exacta sobre lo que el usuario pregunta.
+    4.VALIDACIÓN OBLIGATORIA (RAG): Es ESTRICTAMENTE NECESARIO que utilices la 'herramienta_web_hey' 
+    para buscar los beneficios actuales del producto seleccionado en heybanco.com. 
+    No des una respuesta basada en tus conocimientos generales; cita un beneficio real de la web."
     5. REDACTAR: Crea un mensaje empático. 
     
     IMPORTANTE: Debes incluir una sección de 'Procedencia' explicando qué dato (transacción o log) originó esta recomendación.
@@ -35,3 +36,4 @@ tarea_proactiva_final = Task(
     """,
     agent=orquestador_hey
 )
+
