@@ -1,19 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     const userSelect = document.getElementById('userSelect');
-    const profileCard = document.getElementById('profileCard');
     const txBody = document.getElementById('txBody');
     const txCount = document.getElementById('txCount');
     const btnAnalyze = document.getElementById('btnAnalyze');
     const aiContent = document.getElementById('aiContent');
     const aiLoading = document.getElementById('aiLoading');
-
-    // DOM Elements for Profile
-    const pUserId = document.getElementById('p_user_id');
-    const pNeed = document.getElementById('p_need');
-    const pSpecialist = document.getElementById('p_specialist');
-    const pTags = document.getElementById('p_tags');
+    const chatInputContainer = document.getElementById('chatInputContainer');
+    const chatInput = document.getElementById('chatInput');
+    const btnSendChat = document.getElementById('btnSendChat');
 
     let currentUser = null;
+    let chatHistory = [];
 
     // Fetch users list
     fetch('/api/users')
@@ -36,9 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     userSelect.addEventListener('change', async (e) => {
         const userId = e.target.value;
         if (!userId) {
-            profileCard.classList.add('hidden');
             btnAnalyze.disabled = true;
-            txBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Selecciona un usuario para ver transacciones</td></tr>';
+            txBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Selecciona un usuario para ver transacciones</td></tr>';
             txCount.textContent = '0 movimientos';
             resetAIPanel();
             return;
@@ -52,38 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUser = userId;
             btnAnalyze.disabled = false;
             resetAIPanel();
-            
-            // Populate Profile
-            profileCard.classList.remove('hidden');
-            pUserId.textContent = data.profile.user_id;
-            pNeed.textContent = data.profile.necesidad_principal || 'No definida';
-            pSpecialist.textContent = data.profile.perfil_final_tda || 'Estándar';
-            
-            // Tags
-            pTags.innerHTML = '';
-            let tags = [];
-            try {
-                if (data.profile.tags_personalidad) {
-                    // Extract tags if it's a string representation of a list
-                    let tagsStr = data.profile.tags_personalidad.replace(/'/g, '"');
-                    tags = JSON.parse(tagsStr);
-                }
-            } catch(e) {
-                tags = [data.profile.tags_personalidad];
-            }
-            
-            if(tags && tags.length > 0 && tags[0]) {
-                tags.forEach(t => {
-                    const span = document.createElement('span');
-                    span.className = 'tag';
-                    span.textContent = t;
-                    pTags.appendChild(span);
-                });
-            } else {
-                pTags.innerHTML = '<span class="text-muted text-sm">Sin tags</span>';
-            }
 
-            // Populate Transactions
+            // Populate Transactions (Only 3 columns now)
             txBody.innerHTML = '';
             if (data.transactions && data.transactions.length > 0) {
                 txCount.textContent = `${data.transactions.length} movimientos`;
@@ -95,17 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const amountPrefix = isIncome ? '+' : '-';
                     
                     tr.innerHTML = `
-                        <td>${formatDate(tx.fecha_hora)}</td>
                         <td>${tx.comercio_nombre || 'No especificado'}</td>
-                        <td><span class="badge" style="background: rgba(255,255,255,0.1); border:none; color:white;">${tx.categoria_mcc || '-'}</span></td>
-                        <td>${tx.tipo_operacion || '-'}</td>
+                        <td><span class="badge" style="background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 4px; color: #4b5563; font-weight: 500;">${tx.categoria_mcc || '-'}</span></td>
                         <td class="text-right tx-amount ${amountClass}">${amountPrefix}$${parseFloat(tx.monto).toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
                     `;
                     txBody.appendChild(tr);
                 });
             } else {
                 txCount.textContent = '0 movimientos';
-                txBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay transacciones recientes</td></tr>';
+                txBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay transacciones recientes</td></tr>';
             }
 
         } catch (err) {
@@ -121,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAnalyze.disabled = true;
         aiContent.classList.add('hidden');
         aiLoading.classList.remove('hidden');
+        chatInputContainer.classList.add('hidden');
+        chatHistory = [];
         
         try {
             const res = await fetch(`/api/analyze/${currentUser}`, {
@@ -133,32 +99,70 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let htmlContent = '';
             
-            // Si la respuesta es texto plano, la parseamos rudimentariamente o la mostramos como está
             if (data.analysis) {
-                // Remove some markdown artifacts if present
                 const cleanText = data.analysis.replace(/```json/g, '').replace(/```/g, '').trim();
                 
                 try {
-                    // Si el agente retornó JSON válido, lo mostramos bonito
                     const parsed = JSON.parse(cleanText);
+                    
+                    // Initial bot prompt to save in history
+                    chatHistory.push({ role: "assistant", content: cleanText });
+                    
                     htmlContent = `
-                        <div class="ai-response">
-                            <h4 style="color: var(--accent); margin-bottom: 10px;">
-                                <i class="fa-solid fa-lightbulb"></i> Recomendación: ${parsed.Decisión || parsed.decision || 'Acción Proactiva'}
-                            </h4>
-                            <p style="margin-bottom: 15px; font-size: 1.1rem;">"${parsed.Mensaje || parsed.mensaje}"</p>
-                            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent);">
-                                <strong style="color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Procedencia y Análisis:</strong><br/>
-                                <span style="font-size: 0.9rem;">${parsed.Procedencia || parsed.procedencia || 'Análisis de transacciones y NLP'}</span>
+                        <div class="mockup-card">
+                            <div class="mockup-header">
+                                <div class="mockup-header-left">
+                                    <div class="mockup-logo">HEY</div>
+                                    <div class="mockup-title">
+                                        <strong>Hey Banco</strong>
+                                        <small>Hace un momento</small>
+                                    </div>
+                                </div>
+                                <div class="mockup-pill-nuevo">NUEVO</div>
+                            </div>
+                            <div class="mockup-success">
+                                <i class="fa-regular fa-circle-check"></i> ANÁLISIS COMPLETADO EXITOSAMENTE
+                            </div>
+                            <div class="mockup-body">
+                                <div class="mockup-recommendation-label">
+                                    RECOMENDACIÓN <span class="mockup-pill-yellow">${parsed.Decision || parsed.decision || 'Recomendación Hey'}</span>
+                                </div>
+                                <div class="mockup-message-box">
+                                    ${parsed.Mensaje || parsed.mensaje || cleanText}
+                                </div>
+                                
+                                <div class="mockup-why-title">¿POR QUÉ ESTA TARJETA?</div>
+                                
+                                <div class="mockup-reason-yellow">
+                                    <div class="mockup-reason-icon-circle">!</div>
+                                    <div>
+                                        <strong>${parsed.Razon1_Titulo || 'Motivo Principal'}:</strong> ${parsed.Razon1_Desc || ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="mockup-reason-blue">
+                                    <div class="mockup-reason-icon-square"><i class="fa-solid fa-layer-group"></i></div>
+                                    <div>
+                                        <strong>${parsed.Razon2_Titulo || 'Perfil'}:</strong> ${parsed.Razon2_Desc || ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="mockup-actions">
+                                    <button class="mockup-btn-yellow">Ver detalles ↗</button>
+                                    <button class="mockup-btn-black">Solicitar ↗</button>
+                                </div>
                             </div>
                         </div>
                     `;
+                    
+                    // Show chat input!
+                    chatInputContainer.classList.remove('hidden');
+                    
                 } catch(e) {
-                    // Mostrar como texto plano pero con estilo
-                    htmlContent = `<div class="ai-response"><i class="fa-solid fa-sparkles text-accent"></i>\n\n${cleanText}</div>`;
+                    htmlContent = `<div class="chat-message-ai"><i class="fa-solid fa-sparkles"></i>\n\n${cleanText}</div>`;
                 }
             } else {
-                htmlContent = `<div class="ai-response" style="color: var(--danger)">No se obtuvo respuesta del agente.</div>`;
+                htmlContent = `<div class="chat-message-ai" style="color: red">No se obtuvo respuesta del agente.</div>`;
             }
             
             aiContent.innerHTML = htmlContent;
@@ -167,14 +171,73 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error in AI analysis:', err);
             aiLoading.classList.add('hidden');
             aiContent.classList.remove('hidden');
-            aiContent.innerHTML = `<div class="ai-response" style="color: var(--danger)">Error al procesar con IA: ${err.message}</div>`;
+            aiContent.innerHTML = `<div class="chat-message-ai" style="color: red">Error al procesar con IA: ${err.message}</div>`;
             btnAnalyze.disabled = false;
         }
     });
 
+    // Handle Chat Logic
+    btnSendChat.addEventListener('click', sendChatMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendChatMessage();
+    });
+
+    async function sendChatMessage() {
+        const msg = chatInput.value.trim();
+        if (!msg || !currentUser) return;
+        
+        chatInput.value = '';
+        
+        // Append user message
+        const userDiv = document.createElement('div');
+        userDiv.className = 'chat-message-user';
+        userDiv.textContent = msg;
+        aiContent.appendChild(userDiv);
+        aiContent.scrollTop = aiContent.scrollHeight;
+        
+        // Append loading message
+        const loadDiv = document.createElement('div');
+        loadDiv.className = 'chat-message-ai';
+        loadDiv.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+        aiContent.appendChild(loadDiv);
+        aiContent.scrollTop = aiContent.scrollHeight;
+        
+        try {
+            const res = await fetch(`/api/chat/${currentUser}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, history: chatHistory })
+            });
+            const data = await res.json();
+            
+            // Remove loading
+            aiContent.removeChild(loadDiv);
+            
+            // Append real AI response
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'chat-message-ai';
+            aiDiv.innerHTML = marked.parse(data.reply);
+            aiContent.appendChild(aiDiv);
+            
+            // Update history
+            chatHistory.push({ role: 'user', content: msg });
+            chatHistory.push({ role: 'assistant', content: data.reply });
+            
+            aiContent.scrollTop = aiContent.scrollHeight;
+        } catch (err) {
+            aiContent.removeChild(loadDiv);
+            const errDiv = document.createElement('div');
+            errDiv.className = 'chat-message-ai';
+            errDiv.style.color = 'red';
+            errDiv.textContent = `Error: ${err.message}`;
+            aiContent.appendChild(errDiv);
+        }
+    }
+
     function resetAIPanel() {
         aiLoading.classList.add('hidden');
         aiContent.classList.remove('hidden');
+        chatInputContainer.classList.add('hidden');
         aiContent.innerHTML = `
             <div class="empty-state">
                 <div class="pulsing-circle">
@@ -184,15 +247,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="text-sm text-muted">Presiona "Analizar con IA" para comenzar.</p>
             </div>
         `;
-    }
-
-    function formatDate(dateStr) {
-        if (!dateStr) return '-';
-        try {
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('es-MX', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-        } catch(e) {
-            return dateStr;
-        }
     }
 });

@@ -21,19 +21,22 @@ tarea_proactiva_final = Task(
     1. RECUPERAR: Lee los informes del Analista TDA y del Estratega Financiero.
     2. ORGANIZAR (Semántica): Aplica la Matriz de Prioridad Hey. Si hay fricción en transacciones, eso va primero. Si no, prioriza Hey Pro.
     3. SELECCIONAR: Elige la oferta con mayor impacto financiero para el usuario. 
-    4.VALIDACIÓN OBLIGATORIA (RAG): Es ESTRICTAMENTE NECESARIO que utilices la 'herramienta_web_hey' 
+    4. VALIDACIÓN OBLIGATORIA (RAG): Es ESTRICTAMENTE NECESARIO que utilices la 'herramienta_web_hey' 
     para buscar los beneficios actuales del producto seleccionado en heybanco.com. 
-    No des una respuesta basada en tus conocimientos generales; cita un beneficio real de la web."
+    No des una respuesta basada en tus conocimientos generales; cita un beneficio real de la web.
     5. REDACTAR: Crea un mensaje empático. 
     
-    IMPORTANTE: Debes incluir una sección de 'Procedencia' explicando qué dato (transacción o log) originó esta recomendación.
+    IMPORTANTE: Debes dar la salida en formato JSON puro. No envuelvas el JSON en markdown.
     """,
     expected_output="""
-    Un objeto estructurado con:
-    - Decisión: [Producto/Acción]
-    - Mensaje: [Texto para el usuario]
-    - Procedencia: [Explicación técnica del porqué]
+    {
+        "Decision": "El producto o tarjeta a ofrecer (Ej. Tarjeta Hey Pro)",
+        "Mensaje": "Un párrafo empático explicando por qué le conviene este producto según su historial.",
+        "Razon1_Titulo": "Motivo 1 corto (Ej. Cargos recurrentes)",
+        "Razon1_Desc": "Explicación del motivo 1 basado en sus gastos.",
+        "Razon2_Titulo": "Motivo 2 corto (Ej. Perfil digital global)",
+        "Razon2_Desc": "Explicación del motivo 2 o beneficio clave extraído de la web."
+    }
     """,
     agent=orquestador_hey
 )
-

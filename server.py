@@ -78,3 +78,24 @@ def analyze_user(user_id: str):
         return {"user_id": user_id, "analysis": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+from pydantic import BaseModel
+from typing import List
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    message: str
+    history: List[ChatMessage]
+
+@app.post("/api/chat/{user_id}")
+def chat_endpoint(user_id: str, req: ChatRequest):
+    try:
+        from main import chat_with_agent
+        reply = chat_with_agent(user_id, req.message, [h.model_dump() for h in req.history])
+        return {"reply": reply}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
